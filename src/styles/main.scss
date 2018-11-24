@@ -1,0 +1,14 @@
+$roboto-font-path: '../../node_modules/roboto-fontface/fonts/roboto/';
+
+@import '../../node_modules/materialize-css/sass/materialize.scss';
+
+.awx-logo {
+  width: 300px;
+  margin: 40px;
+}
+
+fieldset[role="none"] {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
