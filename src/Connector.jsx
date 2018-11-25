@@ -1,9 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter } from 'react-router-dom';
+import jsonQuery from 'json-query';
 
 import ConnectorUI from './components/ConnectorUI';
-import schema from './schema';
+import buildSchema from './schema';
 import AWX from './AWX';
 
 export default class Connector {
@@ -58,23 +59,48 @@ export default class Connector {
   }
 
   async getSchema(callback) {
-    const { tables, connections } = schema;
+    const { eventDataQueries } = this.connectionData;
+    const { tables, connections } = buildSchema(eventDataQueries);
     callback(tables, connections);
   }
 
   async getData(table, callback) {
     const { tableInfo: { id }, appendRows } = table;
     const params = { page_size: 500 };
-    const { baseURL } = this.connectionData;
+    const { baseURL, eventDataQueries, templateID } = this.connectionData;
 
     try {
-      appendRows(await AWX.resource(id)(
+      if (id === 'jobEvents' && templateID) {
+        Object.assign(params, {
+          job__job_template: templateID,
+        });
+      }
+
+      let results = await AWX.resource(id)(
         baseURL,
         this.username,
         this.password,
         params,
         this.tab.reportProgress,
-      ));
+      );
+
+
+      if (id === 'jobEvents') {
+        results = results.map((result) => {
+          const changes = {};
+
+          eventDataQueries.forEach((query) => {
+            const data = jsonQuery(query.query, { data: result });
+            if (data.value) {
+              changes[query.name] = data.value;
+            }
+          });
+
+          return Object.assign(result, changes);
+        });
+      }
+
+      appendRows(results);
     } catch (error) {
       console.error(error);
     }

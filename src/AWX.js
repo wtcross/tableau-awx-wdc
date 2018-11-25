@@ -9,8 +9,6 @@ export default class AWX {
 
     this.axios = Axios.create({
       baseURL: `${url.protocol}//${url.host}`,
-      username,
-      password,
       auth: {
         username,
         password,
@@ -69,31 +67,49 @@ export default class AWX {
     return results;
   }
 
-  static async me(baseURL, username, password, params = {}, rowProgressHandler = null) {
+  async me(params = {}) {
     try {
-      await new AWX(baseURL, username, password)
-        .on('row progress', rowProgressHandler)
-        .get('/api/v2/me/', params);
+      return await this.get('/api/v2/me/', params);
     } catch (error) {
       throw error;
     }
   }
 
-  static async jobs(baseURL, username, password, params = {}, rowProgressHandler = null) {
-    return new AWX(baseURL, username, password)
+  async jobs(params = {}, rowProgressHandler = null) {
+    return this
       .on('row progress', rowProgressHandler)
       .get('/api/v2/jobs/', params);
   }
 
-  static async jobEvents(baseURL, username, password, params = {}, rowProgressHandler = null) {
-    return new AWX(baseURL, username, password)
+  async jobEvents(params = {}, rowProgressHandler = null) {
+    return this
       .on('row progress', rowProgressHandler)
       .get('/api/v2/job_events/', params);
   }
 
-  static async jobTemplates(baseURL, username, password, params = {}) {
-    return new AWX(baseURL, username, password)
+  async jobTemplates(params = {}) {
+    return this
       .get('/api/v2/job_templates/', params);
+  }
+
+  static async me(baseURL, username, password, params = {}) {
+    const client = new AWX(baseURL, username, password);
+    return client.me(params);
+  }
+
+  static async jobs(baseURL, username, password, params = {}, rowProgressHandler = null) {
+    const client = new AWX(baseURL, username, password);
+    return client.jobs(params, rowProgressHandler);
+  }
+
+  static async jobEvents(baseURL, username, password, params = {}, rowProgressHandler = null) {
+    const client = new AWX(baseURL, username, password);
+    return client.jobEvents(params, rowProgressHandler);
+  }
+
+  static async jobTemplates(baseURL, username, password, params = {}) {
+    const client = new AWX(baseURL, username, password);
+    return client.jobTemplates(params);
   }
 
   static resource(name) {

@@ -1,10 +1,46 @@
 import jobs from './tables/jobs';
 import jobEvents from './tables/jobEvents';
 
-export default {
+const connection = {
+  alias: 'joined job with job events',
   tables: [
-    jobs,
-    jobEvents,
+    { id: 'jobEvents', alias: 'jobEvents' },
+    { id: 'jobs', alias: 'jobs' },
   ],
-  connections: [],
+  joins: [
+    {
+      left: { tableAlias: 'jobs', columnId: 'id' },
+      right: { tableAlias: 'jobEvents', columnId: 'job' },
+      joinType: 'left',
+    },
+  ],
 };
+
+export default function build(eventDataQueries = []) {
+  const schema = {
+    tables: [
+      jobs,
+    ],
+    connections: [connection],
+  };
+
+  const eventDataColumns = eventDataQueries.reduce((accumulator, { name, role, type }) => {
+    const column = {
+      id: name,
+      alias: name,
+      dataType: type,
+    };
+
+    if (role !== 'default') {
+      column.role = role;
+    }
+
+    return accumulator.concat(column);
+  }, []);
+
+  jobEvents.columns.push(...eventDataColumns);
+
+  schema.tables.push(jobEvents);
+
+  return schema;
+}

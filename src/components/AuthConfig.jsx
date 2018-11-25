@@ -50,7 +50,6 @@ export default class AuthConfig extends React.Component {
         connector.password = password;
 
         if (connector.inInteractivePhase) {
-          console.log('change');
           history.push('/data');
         } else {
           connector.submit();
