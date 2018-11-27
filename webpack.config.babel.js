@@ -114,7 +114,7 @@ module.exports = (_, argv) => {
         appMountId: 'app',
         title: 'AWX Web Data Connector for Tableau',
         links: [
-          'http://fonts.googleapis.com/icon?family=Material+Icons',
+          'https://fonts.googleapis.com/icon?family=Material+Icons',
         ],
         meta: [
           {
